@@ -733,9 +733,6 @@
 import { DatePicker } from "antd";
 import moment from "moment"; // still used if you need moment formatting
 import dayjs from "dayjs"; // ✅ add this
-
-
-
 import React, { useState, useEffect } from "react";
 import {
   Button,
@@ -794,8 +791,6 @@ const customStyles = `
   .ant-modal-footer .ant-btn { border-radius: 8px; font-weight: 600; height: 38px; padding: 0 16px; }
   .ant-modal-footer .ant-btn-primary { background-color: ${PRIMARY_BLUE} !important; border-color: ${PRIMARY_BLUE} !important; }
 `;
-
-
 
 const getRoleTag = (role) => {
   let color = "blue";
@@ -904,15 +899,14 @@ const ReviewChecklistModal = ({ checklist, open, onClose }) => {
     }, []);
 
     const preparedDocs = flatDocs.map((doc, idx) => ({
-  ...doc,
-  docIdx: idx,
-  status: doc.status || "pendingrm",
-  action: doc.status || "pendingrm",
-  comment: doc.comment || "",
-  fileUrl: doc.fileUrl || null,
-  expiryDate: doc.expiryDate || null, // ✅ add this
-}));
-
+      ...doc,
+      docIdx: idx,
+      status: doc.status || "pendingrm",
+      action: doc.status || "pendingrm",
+      comment: doc.comment || "",
+      fileUrl: doc.fileUrl || null,
+      expiryDate: doc.expiryDate || null,
+    }));
 
     setDocs(preparedDocs);
   }, [checklist]);
@@ -925,38 +919,24 @@ const ReviewChecklistModal = ({ checklist, open, onClose }) => {
     message.success("Document deleted.");
   };
 
-  // post comment
-
-  // const handlePostCreatorComment = () => {
-  //   if (!creatorComment.trim()) {
-  //     message.error("Comment cannot be empty");
-  //     return;
-  //   }
-
-  //   message.success("Comment added");
-  // };
-
-  console.log("loanType:", loanType);
-  // console.log("categories:", categoriesToDisplay);
-
   const handleAddNewDocument = () => {
     if (!newDocName.trim() || !selectedCategoryName)
       return message.error(
         "Please enter a document name and select a category."
       );
     setDocs((prevDocs) => [
-  ...prevDocs,
-  {
-    docIdx: prevDocs.length,
-    name: newDocName.trim(),
-    category: selectedCategoryName,
-    status: "pendingrm",
-    action: "pendingrm",
-    comment: "",
-    fileUrl: null,
-    expiryDate: null, // ✅ initialize
-  },
-]);
+      ...prevDocs,
+      {
+        docIdx: prevDocs.length,
+        name: newDocName.trim(),
+        category: selectedCategoryName,
+        status: "pendingrm",
+        action: "pendingrm",
+        comment: "",
+        fileUrl: null,
+        expiryDate: null,
+      },
+    ]);
 
     message.success(
       `Document '${newDocName.trim()}' added to ${selectedCategoryName}.`
@@ -971,12 +951,12 @@ const ReviewChecklistModal = ({ checklist, open, onClose }) => {
     updated[idx].status = value;
     setDocs(updated);
   };
+  
   const handleDeferralNoChange = (idx, value) => {
-  const updated = [...docs];
-  updated[idx].deferralNo = value;
-  setDocs(updated);
-};
-
+    const updated = [...docs];
+    updated[idx].deferralNo = value;
+    setDocs(updated);
+  };
 
   const handleCommentChange = (idx, value) => {
     const updated = [...docs];
@@ -1020,26 +1000,21 @@ const ReviewChecklistModal = ({ checklist, open, onClose }) => {
           acc.push(categoryGroup);
         }
         categoryGroup.docList.push({
-  _id: doc._id,
-  name: doc.name,
-  category: doc.category,
-
-  // ✅ KEEP backend-safe enum
-  status: doc.status, // "deferred"
-
-  // ✅ Send readable value for RM
-  displayStatus:
-    doc.status === "deferred" && doc.deferralNo
-      ? `Deferred (${doc.deferralNo})`
-      : doc.status,
-
-  deferralNo: doc.deferralNo,
-  action: doc.action,
-  comment: doc.comment,
-  fileUrl: doc.fileUrl,
-  deferralReason: doc.deferralReason,
-  expiryDate: doc.expiryDate || null,
-});
+          _id: doc._id,
+          name: doc.name,
+          category: doc.category,
+          status: doc.status,
+          displayStatus:
+            doc.status === "deferred" && doc.deferralNo
+              ? `Deferred (${doc.deferralNo})`
+              : doc.status,
+          deferralNo: doc.deferralNo,
+          action: doc.action,
+          comment: doc.comment,
+          fileUrl: doc.fileUrl,
+          deferralReason: doc.deferralReason,
+          expiryDate: doc.expiryDate || null,
+        });
 
         return acc;
       }, []);
@@ -1054,37 +1029,56 @@ const ReviewChecklistModal = ({ checklist, open, onClose }) => {
   };
 
   const submitToCheckers = async () => {
-    if (!checklist?.dclNo) return message.error("DCL No missing.");
-    try {
-      message.loading({
-        content: "Submitting checklist to Co-Checker...",
-        key: "checkerSubmit",
-      });
-      const payload = {
-        dclNo: checklist.dclNo,
-        documents: docs,
-        status: "co_checker_review",
-        submittedToCoChecker: true,
-        finalComment: checkerComment,
-        attachments: checkerFiles,
-      };
-      await updateChecklistStatus(payload).unwrap();
-      message.success({
-        content: "Checklist submitted to Co-Checker!",
-        key: "checkerSubmit",
-        duration: 3,
-      });
-      onClose();
-    } catch (err) {
-      console.error(err);
-      message.error({
-        content: err?.data?.error || "Failed to submit checklist.",
-        key: "checkerSubmit",
-      });
-    }
-  };
+  if (!checklist?.dclNo) return message.error("DCL No missing.");
+  
+  try {
+    message.loading({
+      content: "Submitting checklist to Co-Checker...",
+      key: "checkerSubmit",
+    });
+    
+    // Simplified payload structure
+    const payload = {
+      dclNo: checklist.dclNo,
+      status: "co_checker_review",
+      // Send documents as a flat array instead of nested structure
+      documents: docs.map(doc => ({
+        _id: doc._id,
+        name: doc.name,
+        category: doc.category,
+        status: doc.action || doc.status,
+        comment: doc.comment || "",
+        fileUrl: doc.fileUrl || null,
+        expiryDate: doc.expiryDate || null,
+        deferralNo: doc.deferralNo || null,
+      }))
+    };
+    
+    console.log("Simplified payload:", payload);
+    
+    const result = await updateChecklistStatus(payload).unwrap();
+    
+    message.success({
+      content: "Checklist submitted to Co-Checker!",
+      key: "checkerSubmit",
+      duration: 3,
+    });
+    onClose();
+  } catch (err) {
+    console.error("Submit Error Details:", {
+      error: err,
+      data: err?.data,
+      status: err?.status,
+      endpoint: '/api/cocreatorChecklist/update-status'
+    });
+    
+    message.error({
+      content: err?.data?.message || err?.data?.error || "Failed to submit checklist.",
+      key: "checkerSubmit",
+    });
+  }
+};
 
-  const uniqueCategories = [...new Set(docs.map((doc) => doc.category))];
   const allDocsApproved =
     docs.length > 0 && docs.every((doc) => doc.action === "submitted");
   const total = docs.length;
@@ -1129,89 +1123,87 @@ const ReviewChecklistModal = ({ checklist, open, onClose }) => {
       ),
     },
     {
-  title: "Action",
-  dataIndex: "action",
-  width: 220,
-  render: (text, record) => (
-    <div style={{ display: "flex", gap: 8 }}>
-      <Select
-        size="small"
-        value={record.action}
-        style={{ width: record.action === "deferred" ? 110 : "100%" }}
-        onChange={(val) => handleActionChange(record.docIdx, val)}
-        disabled={isActionDisabled}
-      >
-        <Option value="submitted">Submitted</Option>
-        <Option value="pendingrm">Pending from RM</Option>
-        <Option value="pendingco">Pending from Co</Option>
-        <Option value="tbo">TBO</Option>
-        <Option value="sighted">Sighted</Option>
-        <Option value="waived">Waived</Option>
-        <Option value="deferred">Deferred</Option>
-      </Select>
+      title: "Action",
+      dataIndex: "action",
+      width: 220,
+      render: (text, record) => (
+        <div style={{ display: "flex", gap: 8 }}>
+          <Select
+            size="small"
+            value={record.action}
+            style={{ width: record.action === "deferred" ? 110 : "100%" }}
+            onChange={(val) => handleActionChange(record.docIdx, val)}
+            disabled={isActionDisabled}
+          >
+            <Option value="submitted">Submitted</Option>
+            <Option value="pendingrm">Pending from RM</Option>
+            <Option value="pendingco">Pending from Co</Option>
+            <Option value="tbo">TBO</Option>
+            <Option value="sighted">Sighted</Option>
+            <Option value="waived">Waived</Option>
+            <Option value="deferred">Deferred</Option>
+          </Select>
 
-      {record.action === "deferred" && (
-        <Input
-          size="small"
-          placeholder="Deferral No"
-          value={record.deferralNo || ""}
-          onChange={(e) =>
-            handleDeferralNoChange(record.docIdx, e.target.value)
-          }
-          style={{ width: 100 }}
-          disabled={isActionDisabled}
-        />
-      )}
-    </div>
-  ),
-},
-
+          {record.action === "deferred" && (
+            <Input
+              size="small"
+              placeholder="Deferral No"
+              value={record.deferralNo || ""}
+              onChange={(e) =>
+                handleDeferralNoChange(record.docIdx, e.target.value)
+              }
+              style={{ width: 100 }}
+              disabled={isActionDisabled}
+            />
+          )}
+        </div>
+      ),
+    },
     {
-  title: "Co status",
-  dataIndex: "status",
-  width: 150,
-  render: (status, record) => {
-    let color = "default";
+      title: "Co status",
+      dataIndex: "status",
+      width: 150,
+      render: (status, record) => {
+        let color = "default";
 
-    switch ((status || "").toLowerCase()) {
-      case "submitted":
-        color = "green";
-        break;
-      case "pendingrm":
-        color = "#6E0C05";
-        break;
-      case "pendingco":
-        color = "#6E0549";
-        break;
-      case "waived":
-        color = "#C4AA1D";
-        break;
-      case "sighted":
-        color = "#02ECF5";
-        break;
-      case "deferred":
-        color = "#55C41D";
-        break;
-      case "tbo":
-        color = "#0F13E5";
-        break;
-      default:
-        color = "default";
-    }
+        switch ((status || "").toLowerCase()) {
+          case "submitted":
+            color = "green";
+            break;
+          case "pendingrm":
+            color = "#6E0C05";
+            break;
+          case "pendingco":
+            color = "#6E0549";
+            break;
+          case "waived":
+            color = "#C4AA1D";
+            break;
+          case "sighted":
+            color = "#02ECF5";
+            break;
+          case "deferred":
+            color = "#55C41D";
+            break;
+          case "tbo":
+            color = "#0F13E5";
+            break;
+          default:
+            color = "default";
+        }
 
-    const statusLabel =
-      status === "deferred" && record.deferralNo
-        ? `Deferred (${record.deferralNo})`
-        : status;
+        const statusLabel =
+          status === "deferred" && record.deferralNo
+            ? `Deferred (${record.deferralNo})`
+            : status;
 
-    return (
-      <Tag className="status-tag" color={color}>
-        {statusLabel}
-      </Tag>
-    );
-  },
-},
-
+        return (
+          <Tag className="status-tag" color={color}>
+            {statusLabel}
+          </Tag>
+        );
+      },
+    },
     {
       title: "Co comment",
       dataIndex: "comment",
@@ -1226,113 +1218,104 @@ const ReviewChecklistModal = ({ checklist, open, onClose }) => {
         />
       ),
     },
+    {
+      title: "Expiry Date",
+      dataIndex: "expiryDate",
+      render: (_, record) => {
+        const category = (record.category || "").toLowerCase().trim();
 
-{
-  title: "Expiry Date",
-  dataIndex: "expiryDate",
-  render: (_, record) => {
-    const category = (record.category || "").toLowerCase().trim();
+        if (category !== "compliance documents") {
+          return "-";
+        }
 
-    // Debug log - remove after verifying
-    console.log("Document category:", record.category);
+        const dateValue = record.expiryDate ? dayjs(record.expiryDate) : null;
 
-    if (category !== "compliance documents") {
-      return "-"; // Only show DatePicker for Compliance Documents category
-    }
+        return (
+          <DatePicker
+            value={dateValue}
+            onChange={(date) => {
+              const updatedDocs = [...docs];
+              updatedDocs[record.docIdx].expiryDate = date ? date.toISOString() : null;
+              setDocs(updatedDocs);
+            }}
+            allowClear
+            disabled={isActionDisabled}
+            style={{ width: 160 }}
+            placeholder="Select expiry date"
+          />
+        );
+      },
+    },
+    {
+      title: "Expiry Status",
+      dataIndex: "expiryStatus",
+      render: (_, record) => {
+        const category = (record.category || "").toLowerCase().trim();
 
-    const dateValue = record.expiryDate ? dayjs(record.expiryDate) : null;
+        if (category !== "compliance documents") {
+          return "-";
+        }
 
-    return (
-      <DatePicker
-        value={dateValue}
-        onChange={(date) => {
-          const updatedDocs = [...docs];
-          updatedDocs[record.docIdx].expiryDate = date ? date.toISOString() : null;
-          setDocs(updatedDocs);
-        }}
-        allowClear
-        disabled={isActionDisabled} // or your submitting state
-        style={{ width: 160 }}
-        placeholder="Select expiry date"
-      />
-    );
-  },
-},
+        const status = getExpiryStatus(record.expiryDate);
 
-{
-  title: "Expiry Status",
-  dataIndex: "expiryStatus",
-  render: (_, record) => {
-    const category = (record.category || "").toLowerCase().trim();
+        if (!status) return "-";
 
-    if (category !== "compliance documents") {
-      return "-";
-    }
-
-    const status = getExpiryStatus(record.expiryDate);
-
-    if (!status) return "-";
-
-    return (
-      <Button
-        size="small"
-        type="primary"
-        danger={status === "expired"}
-        style={{
-          backgroundColor: status === "current" ? "#52c41a" : undefined,
-          borderColor: status === "current" ? "#52c41a" : undefined,
-          cursor: "default",
-        }}
-      >
-        {status === "current" ? "Current" : "Expired"}
-      </Button>
-    );
-  },
-},
-
-
-{
-  title: "RM Status",
-  dataIndex: "rmStatus",
-  width: 150,
-  render: (status, record) => {
-    /* code from above */
-  },
-},  // <-- Make sure this comma is here to separate from the next object
-
-{
-  title: "View",
-  key: "view",
-  width: 80,
-  render: (_, record) =>
-    record.fileUrl ? (
-      <Button
-        type="primary"
-        icon={<EyeOutlined />}
-        onClick={() => {
-          const newWindow = window.open(
-            record.fileUrl,
-            "_blank",
-            "noopener,noreferrer"
-          );
-          if (!newWindow)
-            message.error("Popup blocked! Please allow popups.");
-        }}
-        size="small"
-        style={{
-          backgroundColor: PRIMARY_BLUE,
-          borderColor: PRIMARY_BLUE,
-          borderRadius: 6,
-        }}
-        disabled={isActionDisabled}
-      >
-        View
-      </Button>
-    ) : (
-      <Tag color="default">No File</Tag>
-    ),
-},
-
+        return (
+          <Button
+            size="small"
+            type="primary"
+            danger={status === "expired"}
+            style={{
+              backgroundColor: status === "current" ? "#52c41a" : undefined,
+              borderColor: status === "current" ? "#52c41a" : undefined,
+              cursor: "default",
+            }}
+          >
+            {status === "current" ? "Current" : "Expired"}
+          </Button>
+        );
+      },
+    },
+    {
+      title: "RM Status",
+      dataIndex: "rmStatus",
+      width: 150,
+      render: (status, record) => {
+        /* code from above */
+      },
+    },
+    {
+      title: "View",
+      key: "view",
+      width: 80,
+      render: (_, record) =>
+        record.fileUrl ? (
+          <Button
+            type="primary"
+            icon={<EyeOutlined />}
+            onClick={() => {
+              const newWindow = window.open(
+                record.fileUrl,
+                "_blank",
+                "noopener,noreferrer"
+              );
+              if (!newWindow)
+                message.error("Popup blocked! Please allow popups.");
+            }}
+            size="small"
+            style={{
+              backgroundColor: PRIMARY_BLUE,
+              borderColor: PRIMARY_BLUE,
+              borderRadius: 6,
+            }}
+            disabled={isActionDisabled}
+          >
+            View
+          </Button>
+        ) : (
+          <Tag color="default">No File</Tag>
+        ),
+    },
     {
       title: "Delete",
       key: "delete",
@@ -1376,17 +1359,6 @@ const ReviewChecklistModal = ({ checklist, open, onClose }) => {
           >
             Submit to RM
           </Button>,
-
-          // <Button
-          //   key="submit-checker"
-          //   type="primary"
-          //   loading={isCheckerSubmitting}
-          //   onClick={submitToCheckers}
-          //   disabled={checklist?.status !== "rm_review" || docs.length === 0}
-          // >
-          //   Submit to Co-Checker
-          // </Button>,
-
           <Button
             key="submit-checker"
             type="primary"
@@ -1480,19 +1452,8 @@ const ReviewChecklistModal = ({ checklist, open, onClose }) => {
             />
 
             <div style={{ marginTop: 18 }}>
-              {/* <DocumentInputSectionCoCreator
-                uniqueCategories={uniqueCategories}
-                // disabled={isActionDisabled}
-                newDocName={newDocName}
-                setNewDocName={setNewDocName}
-                selectedCategoryName={selectedCategoryName} 
-                setSelectedCategoryName={setSelectedCategoryName}
-                handleAddNewDocument={handleAddNewDocument}
-              /> */}
-
-              {/* 🔹 Document Input */}
               <DocumentInputSectionCoCreator
-                loanType={loanTypes} // ✅ THIS FIXES EVERYTHING
+                loanType={loanTypes}
                 newDocName={newDocName}
                 setNewDocName={setNewDocName}
                 selectedCategoryName={selectedCategoryName}
@@ -1512,19 +1473,6 @@ const ReviewChecklistModal = ({ checklist, open, onClose }) => {
                   disabled={isActionDisabled}
                   placeholder="Add a comment for RM / Co-Checker"
                 />
-
-                {/* <Button
-                  type="primary"
-                  onClick={handlePostCreatorComment}
-                  disabled={isActionDisabled || !creatorComment.trim()}
-                  style={{
-                    height: 38,
-                    backgroundColor: PRIMARY_BLUE,
-                    borderColor: PRIMARY_BLUE,
-                  }}
-                >
-                  Post Comment
-                </Button> */}
               </div>
             </div>
 

@@ -21,7 +21,7 @@ import {
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 
-import RmReviewChecklistModal from "../../components/modals/RmReviewChecklistModal";
+import CreatorCompletedChecklistModal from "../../components/modals/CreatorCompletedChecklistModal";
 import { useGetAllCoCreatorChecklistsQuery } from "../../api/checklistApi";
 
 const { Text } = Typography;
@@ -303,7 +303,7 @@ const Completed = ({ userId }) => {
       )}
 
       {selectedChecklist && (
-        <RmReviewChecklistModal
+        <CreatorCompletedChecklistModal
           checklist={selectedChecklist}
           open={modalOpen}
           onClose={() => {

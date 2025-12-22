@@ -5085,32 +5085,36 @@ const CheckerReviewChecklistModal = ({ checklist, open, onClose }) => {
     useGetChecklistCommentsQuery(checklist?._id, { skip: !checklist?._id });
 
   useEffect(() => {
-    if (!checklist?.documents) return;
-    const flatDocs = checklist.documents.reduce((acc, item) => {
-      if (item.docList?.length) {
-        const nested = item.docList.map((doc) => ({
-          ...doc,
-          category: item.category,
-        }));
-        return acc.concat(nested);
-      }
-      if (item.category) return acc.concat(item);
-      return acc;
-    }, []);
-
-    setDocs(
-      flatDocs.map((doc, idx) => ({
+  if (!checklist?.documents) return;
+  const flatDocs = checklist.documents.reduce((acc, item) => {
+    if (item.docList?.length) {
+      const nested = item.docList.map((doc) => ({
         ...doc,
-        key: doc._id || `doc-${idx}`,
-        status: doc.status || "pending",
-        approved: doc.approved || false,
-        checkerStatus:
-          doc.checkerStatus || (doc.approved ? "approved" : "pending"),
-        comment: doc.comment || "",
-        fileUrl: doc.fileUrl || null,
-      }))
-    );
-  }, [checklist]);
+        category: item.category,
+        // ✅ Ensure we preserve the status from co-creator
+        coStatus: doc.status || doc.action || "pending", // Add this
+      }));
+      return acc.concat(nested);
+    }
+    if (item.category) return acc.concat(item);
+    return acc;
+  }, []);
+
+  setDocs(
+    flatDocs.map((doc, idx) => ({
+      ...doc,
+      key: doc._id || `doc-${idx}`,
+      // ✅ Preserve co-creator status
+      status: doc.status || doc.action || "pending", // This is important
+      approved: doc.approved || false,
+      checkerStatus: doc.checkerStatus || (doc.approved ? "approved" : "pending"),
+      comment: doc.comment || "",
+      fileUrl: doc.fileUrl || null,
+      expiryDate: doc.expiryDate || null,
+      deferralNo: doc.deferralNo || null,
+    }))
+  );
+}, [checklist]);
 
   const {
     totalDocs,
@@ -5154,19 +5158,32 @@ const CheckerReviewChecklistModal = ({ checklist, open, onClose }) => {
   };
 
   const submitCheckerAction = async (action) => {
-    if (!checklist?._id) return alert("Checklist ID missing");
-    setLoading(true);
-    try {
-      await submitCheckerStatus({ id: checklist._id, action }).unwrap();
-      setConfirmAction(null);
-      onClose();
-    } catch (err) {
-      console.error(err);
-      alert(err?.data?.message || "Failed");
-    } finally {
-      setLoading(false);
-    }
-  };
+  if (!checklist?._id) return alert("Checklist ID missing");
+  setLoading(true);
+  try {
+    // Prepare payload with checker decisions
+    const payload = {
+      id: checklist._id,
+      action: action,
+      // Send checker decisions for each document
+      checkerDecisions: docs.map(doc => ({
+        documentId: doc._id || doc.key,
+        checkerStatus: doc.checkerStatus || (action === "approved" ? "approved" : "rejected"),
+        checkerComment: doc.checkerComment || "",
+      })),
+      checkerComments: checkerComment // Optional: overall comment
+    };
+    
+    await submitCheckerStatus(payload).unwrap();
+    setConfirmAction(null);
+    onClose();
+  } catch (err) {
+    console.error(err);
+    alert(err?.data?.message || "Failed");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const postComment = () => {
     if (!checkerComment.trim()) return;
@@ -5246,17 +5263,51 @@ const CheckerReviewChecklistModal = ({ checklist, open, onClose }) => {
 
 
   const columns = [
-    { title: "Category", dataIndex: "category" },
-    { title: "Document Name", dataIndex: "name" },
-    {
-      title: "Co Status",
-      render: (_, record) =>
-        record.status === "pending" ? (
-          <Tag color={RED}>Pending</Tag>
-        ) : (
-          <Tag color={GREEN}>Submitted</Tag>
-        ),
+  { title: "Category", dataIndex: "category" },
+  { title: "Document Name", dataIndex: "name" },
+  {
+    title: "Co Status",
+    render: (_, record) => {
+      // ✅ Use the actual status from co-creator, not just "submitted"
+      const coStatus = record.status || record.action || "pending";
+      
+      // Map status to colors
+      let color = "default";
+      let displayText = coStatus;
+      
+      switch (coStatus.toLowerCase()) {
+        case "submitted":
+          color = "green";
+          break;
+        case "sighted":
+          color = "blue";
+          break;
+        case "waived":
+          color = "orange";
+          break;
+        case "deferred":
+          color = "purple";
+          displayText = record.deferralNo 
+            ? `Deferred (${record.deferralNo})` 
+            : "Deferred";
+          break;
+        case "tbo":
+          color = "cyan";
+          break;
+        case "pendingrm":
+          color = "red";
+          break;
+        case "pendingco":
+          color = "magenta";
+          break;
+        default:
+          color = "default";
+      }
+      
+      return <Tag color={color}>{displayText}</Tag>;
     },
+  },
+
     { title: "Co Comment", dataIndex: "comment" },
 
     {

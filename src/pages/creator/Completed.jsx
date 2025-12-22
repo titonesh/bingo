@@ -704,7 +704,8 @@ import {
 import { useGetAllCoCreatorChecklistsQuery } from "../../api/checklistApi";
 import CheckerReviewChecklistModal from "../../components/modals/CheckerReviewChecklistModal";
 import dayjs from "dayjs";
-import ReviewChecklistModal from "../../components/modals/ReviewChecklistModal";
+// import ReviewChecklistModal from "../../components/modals/ReviewChecklistModal";
+import CreatorCompletedChecklistModal from "../../components/modals/CreatorCompletedChecklistModal"
 
 /* ---------------- THEME COLORS ---------------- */
 const PRIMARY_BLUE = "#164679";
@@ -1001,7 +1002,8 @@ const Completed = () => {
         //   }}
         // />
 
-        <ReviewChecklistModal
+        // <ReviewChecklistModal
+        <CreatorCompletedChecklistModal
           checklist={selectedChecklist}
           open={!!selectedChecklist}
           onClose={() => setSelectedChecklist(null)}
