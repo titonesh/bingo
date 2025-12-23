@@ -213,6 +213,26 @@ const STATUS_CONFIG = {
         </div>
       ),
     },
+{
+    title: "IBPS No", // ✅ New IBPS NO column
+    dataIndex: "ibpsNo",
+    width: 120,
+    render: (text) => (
+      <div style={{ 
+        color: SECONDARY_BLUE, 
+        fontWeight: 500,
+        fontFamily: "monospace",
+        backgroundColor: text ? "rgba(181, 211, 52, 0.1)" : "transparent",
+        padding: "2px 6px",
+        borderRadius: 4,
+        fontSize: 12,
+        textAlign: "center"
+      }}>
+        {text || "Not set"}
+      </div>
+    ),
+  },
+    
     {
       title: "Loan Type",
       dataIndex: "loanType",

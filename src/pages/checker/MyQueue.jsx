@@ -573,6 +573,25 @@ const CompletedChecklists = ({ userId }) => {
         </span>
       ),
     },
+
+    {
+    title: "IBPS No", // ✅ New IBPS NO column
+    dataIndex: "ibpsNo",
+    width: 120,
+    render: (text) => (
+      <span style={{ 
+        color: PRIMARY_BLUE, 
+        fontWeight: 500,
+        fontFamily: "monospace",
+        backgroundColor: text ? "rgba(82, 196, 26, 0.1)" : "transparent",
+        padding: "2px 8px",
+        borderRadius: 4,
+        fontSize: 13
+      }}>
+        {text || "Not set"}
+      </span>
+    ),
+  },
     {
       title: "Title",
       dataIndex: "title",

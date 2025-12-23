@@ -1692,6 +1692,25 @@ const Myqueue = () => {
         </span>
       ),
     },
+
+    {
+    title: "IBPS No", // ✅ New IBPS NO column
+    dataIndex: "ibpsNo",
+    width: 140,
+    render: (text) => (
+      <span style={{ 
+        color: PRIMARY_BLUE, 
+        fontWeight: 500,
+        fontFamily: "monospace",
+        backgroundColor: text ? "rgba(181, 211, 52, 0.1)" : "transparent",
+        padding: "2px 6px",
+        borderRadius: 4,
+        fontSize: 13
+      }}>
+        {text || "Not set"}
+      </span>
+    ),
+  },
     {
       title: "Loan Type",
       dataIndex: "loanType",
