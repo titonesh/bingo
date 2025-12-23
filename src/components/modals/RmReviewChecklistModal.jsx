@@ -803,6 +803,9 @@ const RmReviewChecklistModal = ({ checklist, open, onClose, refetch }) => {
                 <Descriptions.Item label="Loan Type">
                   {checklist.loanType}
                 </Descriptions.Item>
+                <Descriptions.Item label="IBPS No"> {/* ✅ Added IBPS No */}
+      {checklist.ibpsNo || "Not provided"}
+    </Descriptions.Item>
                 <Descriptions.Item label="Created By">
                   {checklist.createdBy?.name}
                 </Descriptions.Item>

@@ -1391,6 +1391,9 @@ const ReviewChecklistModal = ({ checklist, open, onClose }) => {
                 <Descriptions.Item label="DCL No">
                   {checklist.dclNo}
                 </Descriptions.Item>
+                <Descriptions.Item label="IBPS No"> {/* ✅ Added IBPS No */}
+      {checklist.ibpsNo || "Not provided"}
+    </Descriptions.Item>
                 <Descriptions.Item label="Created At">
                   {checklist.createdAt}
                 </Descriptions.Item>

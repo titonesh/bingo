@@ -5389,11 +5389,16 @@ const CheckerReviewChecklistModal = ({ checklist, open, onClose }) => {
             <Col span={8}>
               <p>
                 <b>DCL No:</b>{" "}
-                <span className="text-purple-700">{checklist?.dclNo}</span>
+                <span className="text-grey-700">{checklist?.dclNo}</span>
               </p>
               <p>
                 <b>Loan Type:</b> {checklist?.loanType}
               </p>
+              <p>
+        <b>IBPS No:</b> {/* ✅ Added IBPS No */}
+        <span className="text-grey-700">{checklist?.ibpsNo || "Not provided"}</span>
+      </p>
+      <p></p>
             </Col>
             <Col span={8}>
               <p>
