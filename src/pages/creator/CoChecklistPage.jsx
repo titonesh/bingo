@@ -366,6 +366,54 @@ const CoChecklistPage = ({ userId }) => {
         <span style={{ color: PRIMARY_BLUE, fontWeight: 500 }}>{text}</span>
       ),
     },
+
+    {
+    title: "IBPS No", // ✅ New IBPS NO column
+    dataIndex: "ibpsNo",
+    width: 140,
+    render: (text) => (
+      <span style={{ 
+        color: PRIMARY_BLUE, 
+        fontWeight: 500,
+        fontFamily: "monospace",
+        backgroundColor: text ? "rgba(181, 211, 52, 0.1)" : "transparent",
+        padding: "2px 6px",
+        borderRadius: 4,
+        fontSize: 13
+      }}>
+        {text || "Not set"}
+      </span>
+    ),
+  },
+
+//   {
+//   title: "IBPS No",
+//   dataIndex: "ibpsNo",
+//   width: 140,
+//   sorter: (a, b) => (a.ibpsNo || "").localeCompare(b.ibpsNo || ""),
+//   filters: [
+//     { text: "Has IBPS No", value: "has" },
+//     { text: "No IBPS No", value: "none" },
+//   ],
+//   onFilter: (value, record) => {
+//     if (value === "has") return !!record.ibpsNo;
+//     if (value === "none") return !record.ibpsNo;
+//     return true;
+//   },
+//   render: (text) => (
+//     <span style={{ 
+//       color: PRIMARY_BLUE, 
+//       fontWeight: 500,
+//       fontFamily: "monospace",
+//       backgroundColor: text ? "rgba(181, 211, 52, 0.1)" : "transparent",
+//       padding: "2px 6px",
+//       borderRadius: 4,
+//       fontSize: 13
+//     }}>
+//       {text || "Not set"}
+//     </span>
+//   ),
+// },
     { title: "Loan Type", dataIndex: "loanType", width: 140 },
     {
       title: "Assigned RM",
