@@ -127,6 +127,7 @@ const CreatorCompletedChecklistModal = ({ checklist, open, onClose }) => {
     doc.text(`Title: ${checklist?.title || "N/A"}`, 40, 94);
     doc.text(`Loan Type: ${checklist?.loanType || "N/A"}`, 40, 110);
     doc.text(`Customer: ${checklist?.customerName || "N/A"} (${checklist?.customerNumber || ""})`, 40, 126);
+    doc.text(`IBPS No: ${checklist?.ibpsNo || "Not provided"}`, 40, 142); // ✅ Added IBPS NO
     doc.text(`Completed: ${checklist?.completionDate ? dayjs(checklist.completionDate).format("DD/MM/YYYY HH:mm") : "N/A"}`, 40, 142);
     doc.text(`Approved By: ${checklist?.approvedBy?.name || "N/A"}`, 40, 158);
     doc.text(`Checker Comments:`, 40, 178);
@@ -386,6 +387,12 @@ const CreatorCompletedChecklistModal = ({ checklist, open, onClose }) => {
                     </Text>
                     <Text type="secondary">{checklist?.customerNumber || ""}</Text>
                   </div>
+                  {/* ✅ Added IBPS NO */}
+        <div style={{ marginTop: 4 }}>
+          <Text type="secondary" style={{ display: "block", fontSize: 13 }}>
+            <b>IBPS No:</b> {checklist?.ibpsNo || "Not provided"}
+          </Text>
+        </div>
 
                   <div>
                     <Text strong style={{ color: PRIMARY_BLUE, display: "block", marginBottom: 4 }}>
